@@ -1,5 +1,6 @@
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
+import os
 import random
 import hashlib
 
@@ -7,8 +8,15 @@ import hashlib
 global clearanceLevel
 clearanceLevel = 1
 points = 10
-def friendPointCounter(friendPoints, numberMod):
-    return friendPoints + numberMod
+def friendPointCounter(friendPoints, negPos, numberMod):
+    if negPos == False:
+        friendPoints -= numberMod
+    elif negPos == True:
+        friendPoints += numberMod
+    return friendPoints
+def angryFaceReaction(angerPoints, active):
+    if active == True:
+        return friendPointCounter(angerPoints, False, 1)
 username = input("What's your preferred name?")
 def howAreYou(parameterHowAreYou):
     howruRespond = (random.randint(0, 4))
@@ -91,7 +99,7 @@ bot = ChatBot(
         {
             "import_path": "chatterbot.logic.BestMatch",
             "default_response": defaultResponseFunc(""),
-            "maximum_similarity_threshold": .95
+            "maximum_similarity_threshold": 1.95
         }
     ],
     database_url = "sqlite:///database.sqlite3"
@@ -158,6 +166,10 @@ trainer.train([
     "No"
 ])
 trainer.train([
+    "What's up?",
+    "Several layers of the atmosphere (such as the stratosphere)."
+])
+trainer.train([
     "Hi",
     "Hello there, " + username + "!",
     "How are you?",
@@ -218,8 +230,8 @@ trainer.train([
 ])
 trainer.train([
     "You're mean",
-    friendPointCounter(points, 1),
-    ">:("
+    ">:(",
+    str(angryFaceReaction(points, True))
 ])
 trainer.train([
     "I love you",
@@ -240,10 +252,27 @@ trainer.train([
 trainer.train([
     "Oh, okay then."
 ])
-while True:
-    try:
-        bot_input = bot.get_response(input(""))
-        print(bot_input)
-
-    except(KeyboardInterrupt, EOFError, SystemExit):
-        break
+def startBot():
+    humanInput = input("")
+    while True:
+        try:
+            bot_input = bot.get_response(humanInput)
+            print(bot_input)
+            if humanInput.lower() == "console":
+                while True:
+                    consoleMod = input("CONSOLE MODE ACTIVATED!")
+                    if consoleMod == "QUIT":
+                        choosePoints = input("DID YOU RECEIVE A NUMBER? (y/n)")
+                        if choosePoints.lower() == "y":
+                            writePoints = input("PLEASE INSERT YOUR NUMBER IN THE FORM OF AN INTEGER.")
+                            if clearanceLevel == 10:
+                                path = "/home/hiddenmonkey/'Programming and Friends'/GianBot/save.txt"
+                            else:
+                                path = input("Please insert path to save.txt")
+                            feelingsEmotions = open(path, 'w')
+                        elif choosePoints.lower() == "n":
+                            print("ACCEPTED. NO CHANGE IN GIANBOT EMOTION.")
+                        else:
+                            print("ERROR! INCORRECT RESPONSE.")
+        except(KeyboardInterrupt, EOFError, SystemExit):
+            break
